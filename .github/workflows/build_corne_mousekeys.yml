@@ -1,0 +1,39 @@
+name: Build Corne rev1 with Mouse Keys
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build crkbd/rev1:jcap
+    runs-on: ubuntu-latest
+    container: ghcr.io/qmk/qmk_cli
+
+    steps:
+      - name: Disable safe.directory check
+        run: |
+          git config --global --add safe.directory '*'
+
+      - name: Checkout QMK Firmware
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: pip3 install -r requirements-dev.txt
+
+      - name: Build firmware
+        run: qmk compile -kb crkbd/rev1 -km jcap
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v7
+        with:
+          name: crkbd-rev1-jcap-mousekeys
+          if-no-files-found: error
+          path: |
+            *.hex
+            *.bin
+            *.uf2
